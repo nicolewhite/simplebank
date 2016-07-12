@@ -5,7 +5,7 @@ import re
 import random
 
 
-def timestamp(date=None):
+def milliseconds_from_date(date=None):
     utc = tz.tzutc()
     local = tz.tzlocal()
 
@@ -31,21 +31,23 @@ class Simple:
 
     def __init__(self, username, password):
         self._base_url = 'https://bank.simple.com'
+
         self._session = requests.Session()
         self._session.headers = {'User-Agent': 'Mozilla/5.0'}
         self._login(username, password)
+        
         self._inexplicable_scale = 10000
-        self._goal_colors = {
-            'teal': '#54BFB5',
-            'yellow': '#F2DA61',
-            'red': '#E37368',
-            'orange': '#EDA55A',
-            'blue': '#4EAACC',
-            'pink': '#E091BE',
-            'purple': '#9483AB',
-            'lime': '#91D174',
-            'grayblue': '#85B5BB',
-            'green': '#98D3AE'
+        self._colors = {
+            'teal':     '#54BFB5',
+            'yellow':   '#F2DA61',
+            'red':      '#E37368',
+            'orange':   '#EDA55A',
+            'blue':     '#4EAACC',
+            'pink':     '#E091BE',
+            'purple':   '#9483AB',
+            'lime':     '#91D174',
+            'bluegray': '#85B5BB',
+            'green':    '#98D3AE'
         }
 
     def _login(self, username, password):
@@ -70,34 +72,36 @@ class Simple:
         goals = [x for x in goals if not x['archived']]
 
         for goal in goals:
-            goal['amount'] /= self._inexplicable_scale
             goal['target_amount'] /= self._inexplicable_scale
             goal['contributed_amount'] /= self._inexplicable_scale
 
             if 'next_contribution' in goal:
                 goal['next_contribution']['amount'] /= self._inexplicable_scale
 
+            del goal['amount']
             del goal['entry_ids']
             del goal['seq']
             del goal['account_ref']
             del goal['user_id']
+            del goal['locked']
+            del goal['archived']
 
         return(goals)
 
     def create_goal(self, name, amount, finish=None, contribute=0, color=None, description='', start=None):
-        color_map = self._goal_colors
+        color_map = self._colors
         amount *= self._inexplicable_scale
         contribute *= self._inexplicable_scale
 
         payload = {
             'name': name,
             'amount': amount,
-            'finish': timestamp(finish),
+            'finish': milliseconds_from_date(finish),
             'contributed_amount': contribute,
             'color': color_map[color] if color else random.choice(color_map.values()),
             'description': description,
-            'start': timestamp(start),
-            'created': timestamp(),
+            'start': milliseconds_from_date(start),
+            'created': milliseconds_from_date(),
             '_csrf': self._csrf
         }
 
