@@ -31,6 +31,11 @@ def milliseconds_from_date(date=None):
     return int((delta.total_seconds() * 1000))
 
 
+def date_from_milliseconds(millis):
+    dt = datetime.fromtimestamp(millis / 1000)
+    return(dt.strftime('%Y-%m-%d'))
+
+
 class Simple:
 
     def __init__(self, username, password):
@@ -85,7 +90,14 @@ class Simple:
             goal['contributed_amount'] /= self._inexplicable_scale
 
             if 'next_contribution' in goal:
-                goal['next_contribution']['amount'] /= self._inexplicable_scale
+                contrib = goal['next_contribution']
+                contrib['amount'] /= self._inexplicable_scale
+                contrib['date'] = date_from_milliseconds(contrib['date'])
+
+            goal['created'] = date_from_milliseconds(goal['created'])
+            goal['modified'] = date_from_milliseconds(goal['modified'])
+            goal['start'] = date_from_milliseconds(goal['start'])
+            goal['finish'] = date_from_milliseconds(goal['finish'])
 
             del goal['amount']
             del goal['entry_ids']
