@@ -5,6 +5,10 @@ import re
 import random
 
 
+class Unauthorized(Exception):
+    pass
+
+
 def milliseconds_from_date(date=None):
     utc = tz.tzutc()
     local = tz.tzlocal()
@@ -35,7 +39,7 @@ class Simple:
         self._session = requests.Session()
         self._session.headers = {'User-Agent': 'Mozilla/5.0'}
         self._login(username, password)
-        
+
         self._inexplicable_scale = 10000
         self._colors = {
             'teal':     '#54BFB5',
@@ -64,7 +68,12 @@ class Simple:
             '_csrf': csrf
         }
 
-        self._session.post(login_url, data=payload)
+        attempt = self._session.post(login_url, data=payload)
+        oops = 'Your username and passphrase don\'t match, please try again.'
+
+        if oops in attempt.text:
+            raise Unauthorized(oops)
+
 
     def goals(self):
         goals = self._session.get(self._base_url + '/goals/data')
