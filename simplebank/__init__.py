@@ -84,33 +84,25 @@ class Simple:
         if oops in attempt.text:
             raise Unauthorized(oops)
 
-
     def goals(self):
         goals = self._session.get(self._base_url + '/goals/data')
         goals = goals.json()
         goals = [x for x in goals if not x['archived']]
 
         for goal in goals:
-            goal['target_amount'] /= self._inexplicable_scale
-            goal['contributed_amount'] /= self._inexplicable_scale
+            for key in ['target_amount', 'contributed_amount']:
+                goal[key] /= self._inexplicable_scale
 
             if 'next_contribution' in goal:
                 contrib = goal['next_contribution']
                 contrib['amount'] /= self._inexplicable_scale
                 contrib['date'] = date_from_milliseconds(contrib['date'])
 
-            goal['created'] = date_from_milliseconds(goal['created'])
-            goal['modified'] = date_from_milliseconds(goal['modified'])
-            goal['start'] = date_from_milliseconds(goal['start'])
-            goal['finish'] = date_from_milliseconds(goal['finish'])
+            for key in ['created', 'modified', 'start', 'finish']:
+                goal[key] = date_from_milliseconds(goal[key])
 
-            del goal['amount']
-            del goal['entry_ids']
-            del goal['seq']
-            del goal['account_ref']
-            del goal['user_id']
-            del goal['locked']
-            del goal['archived']
+            for key in ['amount', 'entry_ids', 'seq', 'account_ref', 'user_id', 'locked', 'archived']:
+                del goal[key]
 
         return goals
 
@@ -137,3 +129,12 @@ class Simple:
         transactions = self._session.get(self._base_url + '/transactions/data')
         transactions = transactions.json()['transactions']
         return transactions
+
+    def balance(self):
+        balance = self._session.get(self._base_url + '/api/account/balances')
+        balance = balance.json()
+
+        for key in balance:
+            balance[key] /= self._inexplicable_scale
+
+        return balance
