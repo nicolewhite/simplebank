@@ -33,7 +33,7 @@ def milliseconds_from_date(date=None):
 
 def date_from_milliseconds(millis):
     dt = datetime.fromtimestamp(millis / 1000)
-    return(dt.strftime('%Y-%m-%d'))
+    return dt.strftime('%Y-%m-%d')
 
 
 class Simple:
@@ -107,7 +107,7 @@ class Simple:
             del goal['locked']
             del goal['archived']
 
-        return(goals)
+        return goals
 
     def create_goal(self, name, amount, finish=None, contribute=0, color=None, description='', start=None):
         color_map = self._colors
@@ -131,4 +131,4 @@ class Simple:
     def transactions(self):
         transactions = self._session.get(self._base_url + '/transactions/data')
         transactions = transactions.json()['transactions']
-        return(transactions)
+        return transactions
