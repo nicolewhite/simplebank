@@ -10,7 +10,7 @@ setup(name='simplebank',
       license='MIT',
       packages=['simplebank'],
       install_requires=[
-        'python-dateutil==2.5.3',
-        'requests==2.10.0',
+        'python-dateutil==2.6.0',
+        'requests==2.12.1',
       ],
       zip_safe=False)
