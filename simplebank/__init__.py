@@ -9,25 +9,30 @@ class Unauthorized(Exception):
     pass
 
 
-def milliseconds_from_date(date=None):
+def utc_to_local(dt):
     utc = tz.tzutc()
+    local = tz.tzlocal()
+
+    dt = dt.replace(tzinfo=utc)
+    dt = dt.astimezone(local)
+
+    return dt
+
+
+def milliseconds_from_date(date=None):
     local = tz.tzlocal()
 
     if date:
         dt = parser.parse(date)
         dt = dt.replace(tzinfo=local)
     else:
-        dt = datetime.utcnow()
-        dt = dt.replace(tzinfo=utc)
-        dt = dt.astimezone(local)
+        dt = utc_to_local(datetime.utcnow())
 
-    dt = dt - dt.dst()
+    dt = dt - dt.dst() # Adjust for daylight savings.
 
-    epoch = datetime(1970, 1, 1)
-    epoch = epoch.replace(tzinfo=utc)
-    epoch = epoch.astimezone(local)
-
+    epoch = utc_to_local(datetime(1970, 1, 1))
     delta = dt - epoch
+
     return int((delta.total_seconds() * 1000))
 
 
